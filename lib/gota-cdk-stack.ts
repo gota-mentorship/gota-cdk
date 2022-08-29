@@ -1,16 +1,23 @@
-import * as cdk from 'aws-cdk-lib'
+import { Stack, StackProps } from 'aws-cdk-lib'
+import * as dynamodb from 'aws-cdk-lib/aws-dynamodb'
 import { Construct } from 'constructs'
-// import * as sqs from 'aws-cdk-lib/aws-sqs';
 
-export class GotaCdkStack extends cdk.Stack {
-    constructor(scope: Construct, id: string, props?: cdk.StackProps) {
+export class GotaCdkStack extends Stack {
+    constructor(scope: Construct, id: string, props?: StackProps) {
         super(scope, id, props)
+        this.setUpDynamodb()
+    }
 
-        // The code that defines your stack goes here
-
-        // example resource
-        // const queue = new sqs.Queue(this, 'GotaCdkQueue', {
-        //   visibilityTimeout: cdk.Duration.seconds(300)
-        // });
+    private setUpDynamodb() {
+        const defaults: dynamodb.TableProps = {
+            partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING },
+            sortKey: { name: 'created_at', type: dynamodb.AttributeType.NUMBER },
+            // free tier (billingMode && readCapacity && writeCapacity)
+            billingMode: dynamodb.BillingMode.PROVISIONED,
+            readCapacity: 25,
+            writeCapacity: 25,
+        }
+        new dynamodb.Table(this, 'UsersTable', { tableName: 'Users', ...defaults })
+        new dynamodb.Table(this, 'MentorshipsTable', { tableName: 'Mentorships', ...defaults })
     }
 }
